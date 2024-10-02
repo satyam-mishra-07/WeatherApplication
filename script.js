@@ -102,35 +102,36 @@ const getCityCoordinates = () =>{
    });
 }
 
-const getUserCoordinates = ()=>{
+const getUserCoordinates = () => {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+    }
+
     navigator.geolocation.getCurrentPosition(
-        position =>{
-            //console.log(position);
-            const { latitude, longitude} =  position.coords;
-
-            //Get city name for the coordinates using reverse geocoding API .
-            const REVERSE_GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}` ;
-            fetch(REVERSE_GEOCODING_URL).then(res => res.json()).then(data => {
-
-                // console.log(data)
-                //  if(!data.length) return alert(`No City found for ${cityName}`);
-                    const { name } = data[0];
-                    getWeatherDetails(name,latitude ,longitude);
-
-                // console.log(data);
-             
-                }).catch(() => {
-                 alert("An Error Occured while Fetching the City!")
-                });
+        position => {
+            const { latitude, longitude } = position.coords;
+            getWeatherDetails(null, latitude, longitude); // Call the weather API using the user's coordinates
         },
-        error =>{
-            //console.log(error);
-            if (error.code === error.PERMISSION_DENIED) {
-                alert("Geolocation request denied . Please reset loacation permission to grant access again...")  
-            } 
+        error => {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
         }
     );
-}
+};
+
 
 searchButton.addEventListener("click", getCityCoordinates);
 
