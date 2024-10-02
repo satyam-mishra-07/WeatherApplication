@@ -111,8 +111,17 @@ const getUserCoordinates = () => {
     navigator.geolocation.getCurrentPosition(
         position => {
             const { latitude, longitude } = position.coords;
-            getWeatherDetails(null, latitude, longitude); // Call the weather API using the user's coordinates
-        },
+            const REVERSE_GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}` ;
+            fetch(REVERSE_GEOCODING_URL).then(res => res.json()).then(data => {
+
+                // console.log(data)
+                //  if(!data.length) return alert(`No City found for ${cityName}`);
+                    const { name } = data[0];
+                    getWeatherDetails(name,latitude ,longitude);
+
+                // console.log(data);
+             
+        })},
         error => {
             switch(error.code) {
                 case error.PERMISSION_DENIED:
